@@ -1,18 +1,34 @@
-# GSE311890 CART Analysis
+# GSE311890 CAR-T Single-Cell Analysis
 
-This repository contains analysis scripts for the GSE311890 CAR-T single-cell project, including year 9.3 T-cell/CAR-T processing, peak vs year 9.3 CAR+ comparison, G1-specific analysis, pySCENIC regulon analysis, external CITE-seq similarity analysis, and downstream visualization.
+Reproducible analysis code for the **GSE311890** CAR-T single-cell study, with a focus on long-term CAR-T persistence, transcriptional state, TCR clonotype dynamics, regulon activity, and external reference comparison.
 
-## Data availability
+> **Associated publication:** *Nature Medicine* (2026)  
+> **DOI:** [10.1038/s41591-026-04578-1](https://doi.org/10.1038/s41591-026-04578-1)
 
-Large input files are not included in this repository because of file size limitations.
+## Overview
 
-Raw and processed data files are available from GEO under accession **GSE311890**.
+This repository contains analysis scripts used to study CAR-T cells at peak expansion and at long-term follow-up (year 9.3). The workflow includes:
 
-Some scripts contain an initial section for constructing Seurat objects from raw or intermediate files. If the processed GEO files have already been downloaded, this object-construction section can be skipped, and the downstream analysis can be started directly from the processed `.rds` objects.
+- scRNA-seq preprocessing and Seurat object preparation
+- Harmony integration, dimensional reduction, clustering, and visualization
+- CAR-positive versus CAR-negative T-cell comparisons
+- TCR clonotype and repertoire-related analyses
+- cell-cycle-aware differential expression
+- pathway and signature analysis
+- pySCENIC regulon analysis
+- external CITE-seq similarity analysis
 
-## Repository structure
+The repository is intended to provide **transparent, reproducible computational analysis code**. Large raw and processed data objects are not duplicated here.
 
-~~~text
+## Data Availability
+
+Raw and processed data are available through GEO under accession **GSE311890**.
+
+Large input files are excluded from this repository because of file-size and data-source restrictions. If processed GEO objects have already been downloaded, the initial object-construction sections of the scripts can be skipped and downstream analysis can begin from the processed `.rds` objects.
+
+## Repository Structure
+
+```text
 GSE311890-CART-analysis/
 ├── README.md
 ├── scripts/
@@ -21,125 +37,85 @@ GSE311890-CART-analysis/
 │   ├── 3_9y and peak car.R
 │   ├── 4_9yclean.R
 │   └── 5_PT1_PT2_CITEseq_G1_similarity.R
-│
 └── pyscenic_out_G1_C4/
     ├── C4_regulon_DEG.tsv
     └── regulons.csv
-~~~
+```
 
-## Script description
+## Analysis Modules
 
-### `1_9y.R`
+### 1. Year 9.3 processing — `1_9y.R`
 
-Processes the year 9.3 T-cell / CAR-T single-cell object.
+Processes the year 9.3 T-cell / CAR-T single-cell object, including object preparation, normalization, dimensional reduction, annotation checking, and preparation for downstream analyses.
 
-This script includes Seurat object preparation, normalization, dimensional reduction, annotation checking, and preparation of downstream analysis objects.
+### 2. Peak expansion processing — `2_peak.R`
 
-The initial object-construction section can be skipped if the processed GEO object has already been downloaded.
+Processes the peak-expansion T-cell / CAR-T object and prepares the data for comparison with long-term CAR-positive cells.
 
-### `2_peak.R`
+### 3. Peak vs. year 9.3 CAR-T analysis — `3_9y and peak car.R`
 
-Processes the peak expansion single-cell object.
+Merges peak and year 9.3 CAR-positive cells and performs:
 
-This script prepares the peak CAR+ / T-cell data for downstream comparison with the year 9.3 CAR+ population.
+- normalization and dimensional reduction
+- Harmony integration
+- clustering and visualization
+- cell-cycle scoring
+- differential expression analysis
+- clonotype-related analysis
+- signature scoring
+- CAR-T state visualization
 
-The initial object-construction section can be skipped if the processed GEO object has already been downloaded.
+### 4. Year 9.3 annotation refinement — `4_9yclean.R`
 
-### `3_9y and peak car.R`
+Refines the long-term CAR-T annotation and performs:
 
-Merges peak and year 9.3 CAR+ cells.
+- removal/reannotation of the cytotoxic NK-like γδ T-cell cluster
+- G1-specific CAR-positive vs. CAR-negative comparison
+- differential expression analysis
+- over-representation analysis
+- signature scoring
+- heatmap visualization
 
-This script performs normalization, dimensional reduction, Harmony integration, clustering, cell-cycle scoring, differential expression analysis, clonotype-related analysis, signature scoring, and visualization of CAR+ cell states.
+### 5. External CITE-seq similarity analysis — `5_PT1_PT2_CITEseq_G1_similarity.R`
 
-The initial object-construction section can be skipped if the processed GEO object has already been downloaded.
+Compares the GSE311890 CAR-positive G1 reference with an external PT1Y9 CITE-seq reference using logistic-regression-based prediction and probability/logit heatmaps.
 
-### `4_9yclean.R`
+This script requires:
 
-Cleans and updates the year 9.3 CAR-T annotation.
+```r
+obj2 <- readRDS("PT1Y9_filtered_with_AUCell.RDS")
+```
 
-This script includes reannotation/removal of the cytotoxic NK-like gamma-delta T-cell cluster, G1-specific CART vs CAR-negative comparison, DEG analysis, ORA enrichment analysis, signature scoring, and heatmap visualization.
+The external object is not included because of size and source restrictions. It should be obtained from the original data source.
 
-The initial object-construction section can be skipped if the processed GEO object has already been downloaded.
+## pySCENIC Regulon Analysis
 
-### `5_PT1_PT2_CITEseq_G1_similarity.R.R`
+The `pyscenic_out_G1_C4/` directory contains selected outputs used for the C4 regulon analysis:
 
-Performs external CITE-seq similarity analysis.
-
-This script compares the GSE311890 CAR+ G1 reference object with an external PT1Y9 CITE-seq reference object using logistic regression-based prediction and probability/logit heatmaps.
-
-This script requires the following external file:
-
-~~~r
-obj2 = readRDS("PT1Y9_filtered_with_AUCell.RDS")
-~~~
-
-`PT1Y9_filtered_with_AUCell.RDS` is not included in this repository because of its large file size and data-source restrictions. This object was obtained from an external Zenodo CITE-seq dataset. Please obtain it from the original source or contact the repository owner if needed.
-
-## pySCENIC regulon analysis
-
-The folder `pyscenic_out_G1_C4/` contains key files used for the C4 regulon network analysis.
-
-~~~text
+```text
 pyscenic_out_G1_C4/
 ├── C4_regulon_DEG.tsv
 └── regulons.csv
-~~~
+```
 
-`C4_regulon_DEG.tsv` contains differential regulon activity results for the C4 comparison.
+- `C4_regulon_DEG.tsv`: differential regulon-activity results
+- `regulons.csv`: pySCENIC regulon output used to recover target genes
 
-`regulons.csv` is the pySCENIC regulon output used to extract target genes for the top regulons.
+Large matrices, database files, and intermediate pySCENIC files are intentionally excluded.
 
-The C4 comparison refers to the G1 CAR+ vs CAR-negative regulon activity comparison.
+## Suggested Run Order
 
-Large pySCENIC input matrices, database files, and intermediate files are not included in this repository.
-
-## Files not included
-
-The following file types are not included because of file size limitations:
-
-~~~text
-*.rds
-*.RDS
-*.h5
-*.loom
-*.gz
-large matrix files
-raw Cell Ranger output folders
-pySCENIC database files
-~~~
-
-Users should download the required input files from GEO, Zenodo, or the original data source before running the scripts.
-
-## Suggested run order
-
-A typical analysis order is:
-
-~~~text
+```text
 1_9y.R
 2_peak.R
 3_9y and peak car.R
 4_9yclean.R
 5_PT1_PT2_CITEseq_G1_similarity.R
-~~~
+```
 
-The pySCENIC C4 regulon network analysis requires:
+## Main R Dependencies
 
-~~~text
-C4_regulon_DEG.tsv
-regulons.csv
-~~~
-
-These files should be placed in:
-
-~~~text
-pyscenic_out_G1_C4/
-~~~
-
-## Main R dependencies
-
-The main R packages used in this repository include:
-
-~~~r
+```text
 Seurat
 dplyr
 ggplot2
@@ -159,10 +135,25 @@ purrr
 igraph
 tidygraph
 ggraph
-~~~
+```
 
-## Notes
+## Files Not Included
 
-File paths in the scripts may need to be adjusted according to the local working directory.
+Examples of excluded large files:
 
-Large input objects are intentionally excluded from this repository. This repository is intended to provide reproducible analysis code and selected downstream regulon outputs, rather than to store all raw and processed data files.
+```text
+*.rds
+*.RDS
+*.h5
+*.loom
+*.gz
+large matrix files
+raw Cell Ranger output folders
+pySCENIC database files
+```
+
+File paths in the scripts may need to be adapted to the local working directory.
+
+## Citation
+
+If this repository is useful for reproducing or extending the associated analysis, please cite the related publication using DOI **10.1038/s41591-026-04578-1** and the GEO accession **GSE311890**.
